@@ -1,0 +1,6 @@
+so
+Flask
+matplotlib
+numpy
+pillow
+gunicorn
