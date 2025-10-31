@@ -1,11 +1,13 @@
 # Use the official Python image as a base
 FROM python:3.11-slim
 
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
+
 # Set the working directory in the container
 WORKDIR /app
-
-# Set the PYTHONPATH to include the root directory
-ENV PYTHONPATH=/app
 
 # Copy the requirements file into the container
 COPY requirements.txt ./
