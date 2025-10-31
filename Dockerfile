@@ -12,8 +12,8 @@ WORKDIR /app
 # Copy the requirements file into the container
 COPY requirements.txt ./
 
-# Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the Python dependencies and gunicorn
+RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 # Copy the rest of the application code into the container
 COPY . .
@@ -21,5 +21,5 @@ COPY . .
 # Expose the port that the app runs on
 EXPOSE 8000
 
-# Command to run the application
-CMD ["python", "wsgi.py"]
+# Command to run the application with gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "src.app:app"]
