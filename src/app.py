@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import base64
-from utils.graph import generate_comparison_chart
+from src.utils.graph import generate_comparison_chart
 
 app = Flask(__name__)
 

@@ -4,6 +4,9 @@ FROM python:3.11-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# Set the PYTHONPATH to include the root directory
+ENV PYTHONPATH=/app
+
 # Copy the requirements file into the container
 COPY requirements.txt ./
 
@@ -17,4 +20,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application
-CMD ["gunicorn", "wsgi:app", "--bind", "0.0.0.0:8000"]
+CMD ["python", "wsgi.py"]
