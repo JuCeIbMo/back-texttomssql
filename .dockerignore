@@ -1,0 +1,19 @@
+# Exclude compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Exclude environment files
+.env
+
+# Exclude Docker-related files
+Dockerfile
+.dockerignore
+
+# Exclude version control files
+.git
+.gitignore
+
+# Exclude unnecessary files
+*.log
+*.sqlite3
