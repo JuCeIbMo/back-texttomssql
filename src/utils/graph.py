@@ -111,39 +111,72 @@ def generate_comparison_chart(dia1, dia2):
         ax.text(bar2.get_x() + bar2.get_width()/2, h2 + max(valores_dia1 + valores_dia2) * 0.02, texto2,
                 ha='center', va='bottom', fontweight='bold', fontsize=11, color='#2c3e50')
 
-        # Calcular y mostrar variación DEBAJO de las barras
-        if valores_reales_dia1[i] != 0:
-            variacion = ((valores_reales_dia2[i] / valores_reales_dia1[i]) - 1) * 100
+        # Calcular y mostrar variación DEBAJO de las barras (con manejo de división por cero)
+        try:
+            if valores_reales_dia1[i] != 0:
+                variacion = ((valores_reales_dia2[i] / valores_reales_dia1[i]) - 1) * 100
+            else:
+                # Si el valor anterior es 0, calcular el porcentaje de incremento desde 0
+                variacion = float('inf') if valores_reales_dia2[i] > 0 else 0
+                
             color_var = '#27ae60' if variacion > 0 else '#e74c3c'
             simbolo = '▲' if variacion > 0 else '▼'
 
             # Posición debajo de las barras (valor y negativo)
-            y_pos = -max(valores_dia1 + valores_dia2) * 0.08
+            y_pos = -max(valores_dia1 + valores_dia2, default=1) * 0.08
 
-            ax.text(x[i], y_pos, f'{simbolo} {variacion:+.1f}%',
+            if variacion == float('inf'):
+                var_text = f'{simbolo} N/A'
+            else:
+                var_text = f'{simbolo} {variacion:+.1f}%'
+
+            ax.text(x[i], y_pos, var_text,
                     ha='center', va='top', color=color_var,
                     fontweight='bold', fontsize=11,
                     bbox=dict(boxstyle='round,pad=0.5', facecolor='white',
                              edgecolor=color_var, linewidth=2, alpha=0.9))
+        except Exception as e:
+            # En caso de cualquier error en el cálculo, mostrar N/A
+            ax.text(x[i], -max(valores_dia1 + valores_dia2, default=1) * 0.08, 'N/A',
+                    ha='center', va='top', color='#7f8c8d',
+                    fontweight='bold', fontsize=11,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='white',
+                             edgecolor='#7f8c8d', linewidth=2, alpha=0.9))
 
     # Ajustar límites del eje Y para dar espacio a las etiquetas debajo
     y_min = -max(valores_dia1 + valores_dia2) * 0.15
     y_max = max(valores_dia1 + valores_dia2) * 1.25
     ax.set_ylim(y_min, y_max)
 
-    # Resumen mejorado
-    variacion_ventas = ((dia2['VENTA']/dia1['VENTA']-1)*100)
-    variacion_facturas = ((dia2['QTY_FAC']/dia1['QTY_FAC']-1)*100)
-    variacion_ticket = ((dia2['FAC_PROM']/dia1['FAC_PROM']-1)*100)
+    # Resumen mejorado (con manejo de división por cero)
+    try:
+        variacion_ventas = ((dia2['VENTA']/dia1['VENTA']-1)*100) if dia1['VENTA'] != 0 else float('inf') if dia2['VENTA'] > 0 else 0
+    except:
+        variacion_ventas = 0
+        
+    try:
+        variacion_facturas = ((dia2['QTY_FAC']/dia1['QTY_FAC']-1)*100) if dia1['QTY_FAC'] != 0 else float('inf') if dia2['QTY_FAC'] > 0 else 0
+    except:
+        variacion_facturas = 0
+        
+    try:
+        variacion_ticket = ((dia2['FAC_PROM']/dia1['FAC_PROM']-1)*100) if dia1['FAC_PROM'] != 0 else float('inf') if dia2['FAC_PROM'] > 0 else 0
+    except:
+        variacion_ticket = 0
 
     simbolo_ventas = '▲' if variacion_ventas > 0 else '▼'
     simbolo_facturas = '▲' if variacion_facturas > 0 else '▼'
     simbolo_ticket = '▲' if variacion_ticket > 0 else '▼'
 
+    def format_variation(variation):
+        if variation == float('inf'):
+            return 'N/A   '
+        return f'{variation:+6.1f}%'
+
     textstr = f'''╔═══ RESUMEN EJECUTIVO ═══╗
-    ║ {simbolo_ventas} Ventas:    {variacion_ventas:+6.1f}%
-    ║ {simbolo_facturas} Facturas:  {variacion_facturas:+6.1f}%
-    ║ {simbolo_ticket} Ticket Prom: {variacion_ticket:+6.1f}%
+    ║ {simbolo_ventas} Ventas:    {format_variation(variacion_ventas)}
+    ║ {simbolo_facturas} Facturas:  {format_variation(variacion_facturas)}
+    ║ {simbolo_ticket} Ticket Prom: {format_variation(variacion_ticket)}
     ╚═════════════════════════╝'''
 
     props = dict(boxstyle='round,pad=1', facecolor='#ecf0f1', alpha=0.95,
